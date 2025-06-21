@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voting DApp</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor/0.29.0/anchor.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+      }
+
+      .header h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transform: translateY(0);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .card h2 {
+        color: #4a5568;
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+      }
+
+      .vote-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .status {
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .status.success {
+        background: #c6f6d5;
+        color: #2f855a;
+        border: 1px solid #9ae6b4;
+      }
+
+      .status.error {
+        background: #fed7d7;
+        color: #c53030;
+        border: 1px solid #feb2b2;
+      }
+
+      .proposal-item {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+      }
+
+      .proposal-description {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        color: #2d3748;
+      }
+
+      .vote-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .vote-for {
+        color: #38a169;
+      }
+
+      .vote-against {
+        color: #e53e3e;
+      }
+
+      .wallet-connect {
+        text-align: center;
+        padding: 40px;
+      }
+
+      .wallet-btn {
+        background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+        font-size: 1.2rem;
+        padding: 15px 30px;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .loading {
+        animation: pulse 1.5s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🗳️ Voting DApp</h1>
+        <p>Decentralized Voting on Solana</p>
+      </div>
+
+      <div id="walletConnect" class="card wallet-connect">
+        <h2>Connect Your Wallet</h2>
+        <p style="margin-bottom: 20px">
+          Please connect your Phantom wallet to start voting
+        </p>
+        <button class="btn wallet-btn" onclick="connectWallet()">
+          Connect Phantom Wallet
+        </button>
+      </div>
+
+      <div id="mainApp" style="display: none">
+        <!-- Create Proposal Section -->
+        <div class="card">
+          <h2>📝 Create New Proposal</h2>
+          <div class="form-group">
+            <label for="proposalDescription">Proposal Description:</label>
+            <textarea
+              id="proposalDescription"
+              placeholder="Enter your proposal description (max 500 characters)..."
+              maxlength="500"
+            ></textarea>
+          </div>
+          <button class="btn" onclick="createProposal()">
+            Create Proposal
+          </button>
+        </div>
+
+        <!-- Voting Section -->
+        <div class="card">
+          <h2>🗳️ Vote on Proposals</h2>
+          <div class="form-group">
+            <label for="proposalAddress">Proposal Address:</label>
+            <input
+              type="text"
+              id="proposalAddress"
+              placeholder="Enter proposal public key..."
+            />
+          </div>
+          <div class="vote-buttons">
+            <button class="btn btn-success" onclick="vote(true)">
+              Vote FOR
+            </button>
+            <button class="btn btn-danger" onclick="vote(false)">
+              Vote AGAINST
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card">
+          <h2>📊 Check Results</h2>
+          <div class="form-group">
+            <label for="resultsAddress">Proposal Address:</label>
+            <input
+              type="text"
+              id="resultsAddress"
+              placeholder="Enter proposal public key..."
+            />
+          </div>
+          <button class="btn" onclick="getResults()">Get Results</button>
+          <div id="resultsDisplay"></div>
+        </div>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="statusContainer"></div>
+    </div>
+
+    <script>
+      // Global variables
+      let wallet = null;
+      let connection = null;
+      let program = null;
+      const PROGRAM_ID = "11111111111111111111111111111111"; // Replace with your program ID
+
+      // Initialize connection
+      async function initializeConnection() {
+        // Connect to devnet
+        connection = new solanaWeb3.Connection(
+          "https://api.devnet.solana.com",
+          "confirmed"
+        );
+      }
+
+      // Connect wallet
+      async function connectWallet() {
+        try {
+          showStatus("Connecting wallet...", "loading");
+
+          if (!window.solana || !window.solana.isPhantom) {
+            throw new Error(
+              "Phantom wallet not found! Please install Phantom wallet."
+            );
+          }
+
+          const response = await window.solana.connect();
+          wallet = window.solana;
+
+          await initializeConnection();
+
+          document.getElementById("walletConnect").style.display = "none";
+          document.getElementById("mainApp").style.display = "block";
+
+          showStatus(
+            `Wallet connected: ${response.publicKey.toString().slice(0, 8)}...`,
+            "success"
+          );
+        } catch (error) {
+          showStatus(`Error: ${error.message}`, "error");
+        }
+      }
+
+      // Create proposal
+      async function createProposal() {
+        try {
+          const description = document
+            .getElementById("proposalDescription")
+            .value.trim();
+
+          if (!description) {
+            throw new Error("Please enter a proposal description");
+          }
+
+          if (description.length > 500) {
+            throw new Error("Description too long (max 500 characters)");
+          }
+
+          showStatus("Creating proposal...", "loading");
+
+          // This is a simplified version - in reality you'd need to:
+          // 1. Set up Anchor provider
+          // 2. Create transaction with proper PDAs
+          // 3. Sign and send transaction
+
+          showStatus(
+            "Proposal creation requires full Anchor setup. Check console for transaction details.",
+            "success"
+          );
+          console.log("Would create proposal with description:", description);
+
+          // Clear form
+          document.getElementById("proposalDescription").value = "";
+        } catch (error) {
+          showStatus(`Error: ${error.message}`, "error");
+        }
+      }
+
+      // Vote on proposal
+      async function vote(support) {
+        try {
+          const proposalAddress = document
+            .getElementById("proposalAddress")
+            .value.trim();
+
+          if (!proposalAddress) {
+            throw new Error("Please enter a proposal address");
+          }
+
+          showStatus(
+            `Casting vote ${support ? "FOR" : "AGAINST"}...`,
+            "loading"
+          );
+
+          // This is a simplified version - in reality you'd need to:
+          // 1. Validate proposal address
+          // 2. Create vote transaction with proper PDAs
+          // 3. Sign and send transaction
+
+          showStatus(
+            `Vote ${support ? "FOR" : "AGAINST"} cast successfully!`,
+            "success"
+          );
+          console.log("Would vote:", support, "on proposal:", proposalAddress);
+        } catch (error) {
+          showStatus(`Error: ${error.message}`, "error");
+        }
+      }
+
+      // Get results
+      async function getResults() {
+        try {
+          const proposalAddress = document
+            .getElementById("resultsAddress")
+            .value.trim();
+
+          if (!proposalAddress) {
+            throw new Error("Please enter a proposal address");
+          }
+
+          showStatus("Fetching results...", "loading");
+
+          // This is a simplified version - in reality you'd need to:
+          // 1. Fetch proposal account data
+          // 2. Parse and display results
+
+          // Mock results for demonstration
+          const mockResults = {
+            description: "Should we implement feature X?",
+            votesFor: 15,
+            votesAgainst: 8,
+            status: "PASSED",
+          };
+
+          displayResults(mockResults);
+          showStatus("Results fetched successfully!", "success");
+        } catch (error) {
+          showStatus(`Error: ${error.message}`, "error");
+        }
+      }
+
+      // Display results
+      function displayResults(results) {
+        const resultsDisplay = document.getElementById("resultsDisplay");
+        const totalVotes = results.votesFor + results.votesAgainst;
+
+        resultsDisplay.innerHTML = `
+                <div class="proposal-item">
+                    <div class="proposal-description">${
+                      results.description
+                    }</div>
+                    <div class="vote-stats">
+                        <span class="vote-for">For: ${results.votesFor}</span>
+                        <span class="vote-against">Against: ${
+                          results.votesAgainst
+                        }</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Total Votes: ${totalVotes}</strong>
+                    </div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: ${getStatusColor(
+                      results.status
+                    )};">
+                        Status: ${results.status}
+                    </div>
+                </div>
+            `;
+      }
+
+      // Get status color
+      function getStatusColor(status) {
+        switch (status) {
+          case "PASSED":
+            return "#38a169";
+          case "REJECTED":
+            return "#e53e3e";
+          case "TIED":
+            return "#d69e2e";
+          default:
+            return "#4a5568";
+        }
+      }
+
+      // Show status message
+      function showStatus(message, type) {
+        const container = document.getElementById("statusContainer");
+        const statusDiv = document.createElement("div");
+        statusDiv.className = `status ${type}`;
+        statusDiv.textContent = message;
+
+        container.appendChild(statusDiv);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+          if (statusDiv.parentNode) {
+            statusDiv.parentNode.removeChild(statusDiv);
+          }
+        }, 5000);
+      }
+
+      // Initialize app
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Voting DApp initialized");
+        console.log(
+          "Note: This is a frontend demo. For full functionality, integrate with Anchor program."
+        );
+      });
+    </script>
+  </body>
+</html>

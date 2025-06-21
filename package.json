@@ -1,0 +1,22 @@
+{
+  "name": "anchor-voting-dapp-cli",
+  "version": "1.0.0",
+  "description": "CLI tool for interacting with the Anchor Voting DApp",
+  "main": "cli-interact.js",
+  "scripts": {
+    "create": "node cli-interact.js create",
+    "vote": "node cli-interact.js vote",
+    "results": "node cli-interact.js results",
+    "list": "node cli-interact.js list"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/web3.js": "^1.78.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "chai": "^5.2.0",
+    "mocha": "^11.7.0"
+  }
+}
